@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: bingo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bingo_db
+      MYSQL_USER: bingo
+      MYSQL_PASSWORD: bingo123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3306:3306"
+    volumes:
+      - bingo_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot123 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  bingo_mysql_data:

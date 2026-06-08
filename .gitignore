@@ -1,0 +1,31 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Local/generated files
+backend_run.log
+*.rtf
+*.pdf
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Java / Spring
+backend/target/
+
+# Env/secrets
+.env
+*.env
+!.env.example
+
+# Local notes
+AVANCES_PROYECTO.md
+*_VPS_LOGIN_FIX.md
+INICIAL.md

@@ -1,0 +1,93 @@
+<section class="page">
+  <h1 class="h3 mb-4">Dashboard administrador</h1>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+  <div *ngIf="data">
+    <div class="row g-3 mb-4">
+      <div class="col-md-3"><div class="metric"><span>Total</span><strong>{{ data.totalCards }}</strong></div></div>
+      <div class="col-md-3"><div class="metric"><span>Generados</span><strong>{{ data.assignedCards }}</strong></div></div>
+      <div class="col-md-3"><div class="metric"><span>Disponibles</span><strong>{{ data.availableCards }}</strong></div></div>
+      <div class="col-md-3"><div class="metric"><span>Cancelados</span><strong>{{ data.cancelledCards }}</strong></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-5">
+        <div class="panel chart-panel">
+          <h2 class="h6">Generados vs disponibles</h2>
+          <div class="donut-wrap">
+            <div
+              class="donut-chart"
+              [style.background]="'conic-gradient(#1F4E79 0 ' + assignedVisualPercent() + '%, #3F8F56 ' + assignedVisualPercent() + '% ' + (assignedVisualPercent() + availableVisualPercent()) + '%, #8B2F1C ' + (assignedVisualPercent() + availableVisualPercent()) + '% 100%)'">
+              <div class="donut-core">
+                <strong>{{ assignedPercent() }}%</strong>
+                <span>generados</span>
+                <small>{{ availablePercent() }}% disp.</small>
+              </div>
+            </div>
+          </div>
+          <div class="stacked-summary" aria-label="Resumen global">
+            <div class="summary-generated" [style.width.%]="assignedVisualPercent()"></div>
+            <div class="summary-available" [style.width.%]="availableVisualPercent()"></div>
+          </div>
+          <div class="chart-legend">
+            <span><i class="legend-dot generated"></i>Generados: {{ data.assignedCards }}</span>
+            <span><i class="legend-dot available"></i>Disponibles: {{ data.availableCards }}</span>
+            <span *ngIf="data.cancelledCards > 0"><i class="legend-dot cancelled"></i>Cancelados: {{ data.cancelledCards }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="panel chart-panel">
+          <h2 class="h6">Cartones por agrupacion</h2>
+          <div class="org-bars">
+            <div class="org-bar-row" *ngFor="let org of data.organizations">
+              <div class="org-label">{{ org.organizationCode }}</div>
+              <div class="org-bar-track">
+                <div class="org-bar-generated" [style.width.%]="orgAssignedVisualPercent(org.assigned, org.total)"></div>
+                <div class="org-bar-available" [style.width.%]="orgAvailableVisualPercent(org.assigned, org.available, org.total)"></div>
+              </div>
+              <div class="org-bar-value">{{ org.assigned }} gen. ({{ orgAssignedPercent(org.assigned, org.total) }}%)</div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span><i class="legend-dot generated"></i>Generados</span>
+            <span><i class="legend-dot available"></i>Disponible restante</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mb-4">
+      <h2 class="h5">Por agrupacion</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Agrupacion</th><th>Total</th><th>Generados</th><th>Disponibles</th><th>Cancelados</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let org of data.organizations">
+              <td class="fw-bold">{{ org.organizationCode }}</td>
+              <td>{{ org.total }}</td>
+              <td>{{ org.assigned }}</td>
+              <td>{{ org.available }}</td>
+              <td>{{ org.cancelled }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="h5">Representantes</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Representante</th><th>Agrupacion</th><th>Cartones generados</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let seller of data.sellers">
+              <td>{{ seller.fullName }} <span class="text-muted small">({{ seller.username }})</span></td>
+              <td>{{ seller.organizationCode }}</td>
+              <td>{{ seller.soldCards }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

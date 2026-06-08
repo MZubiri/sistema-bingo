@@ -1,0 +1,32 @@
+<section class="page verify-page">
+  <div class="panel verify-panel">
+    <h1 class="h3 mb-4">Verificacion de carton</h1>
+    <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+    <div *ngIf="data">
+      <div class="alert" [class.alert-success]="data.status === 'ASSIGNED'" [class.alert-warning]="data.status !== 'ASSIGNED'">
+        {{ data.status === 'ASSIGNED' ? 'Carton valido' : 'Carton invalido o no activo' }}
+      </div>
+      <p class="serial-badge">{{ data.serial }}</p>
+      <div class="verify-details">
+        <p><strong>Estado:</strong> {{ data.status }}</p>
+        <p><strong>Agrupacion:</strong> {{ data.organizationCode }}</p>
+        <p><strong>Comprador:</strong> {{ data.buyerName || '-' }}</p>
+        <p><strong>Representante:</strong> {{ data.sellerName || '-' }}</p>
+        <p><strong>Fecha:</strong> {{ data.assignedAt | date:'medium' }}</p>
+      </div>
+
+      <div class="verify-actions" *ngIf="canDownloadPdf()">
+        <a class="btn btn-primary" [href]="api.publicPdfUrl(data.serial)" target="_blank">
+          Descargar PDF
+        </a>
+      </div>
+
+      <div class="bingo-board" *ngIf="numbers().length">
+        <div class="bingo-head" *ngFor="let letter of ['B','I','N','G','O']">{{ letter }}</div>
+        <ng-container *ngFor="let row of numbers()">
+          <div class="bingo-cell" *ngFor="let value of row" [class.free]="value === 'LIBRE'">{{ value }}</div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</section>

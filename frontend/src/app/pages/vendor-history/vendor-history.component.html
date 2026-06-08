@@ -1,0 +1,58 @@
+<section class="page">
+  <h1 class="h3 mb-4">Historial</h1>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+  <div class="alert alert-danger" *ngIf="pdfError">{{ pdfError }}</div>
+  <form class="panel filter-panel mb-3" (ngSubmit)="load()">
+    <div class="filter-grid filter-grid-history">
+      <div>
+        <label class="form-label">Buscar</label>
+        <input class="form-control" name="search" [(ngModel)]="search" placeholder="Serial o comprador">
+      </div>
+      <div>
+        <label class="form-label">Estado</label>
+        <select class="form-select" name="status" [(ngModel)]="status">
+          <option value="">Todos</option>
+          <option *ngFor="let item of statusOptions" [value]="item">{{ item }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Desde</label>
+        <input class="form-control" name="assignedFrom" [(ngModel)]="assignedFrom" type="date">
+      </div>
+      <div>
+        <label class="form-label">Hasta</label>
+        <input class="form-control" name="assignedTo" [(ngModel)]="assignedTo" type="date">
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </div>
+    <p class="filter-count mb-0">{{ cards.length }} resultado{{ cards.length === 1 ? '' : 's' }}</p>
+  </form>
+  <div class="panel table-responsive mobile-card-panel">
+    <table class="table table-hover align-middle mobile-card-table">
+      <thead>
+        <tr><th>Serial</th><th>Comprador</th><th>Agrupacion</th><th>Estado</th><th>Fecha</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let card of cards">
+          <td class="fw-bold" data-label="Serial">{{ card.serial }}</td>
+          <td data-label="Comprador">{{ card.buyerName }}</td>
+          <td data-label="Agrupacion">{{ card.organizationCode }}</td>
+          <td data-label="Estado"><span class="badge badge-assigned">{{ card.status }}</span></td>
+          <td data-label="Fecha">{{ card.assignedAt | date:'short' }}</td>
+          <td class="actions-cell" data-label="Acciones">
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-outline-primary" type="button" (click)="viewPdf(card)">Ver PDF</button>
+              <button class="btn btn-sm btn-primary" type="button" (click)="downloadPdf(card)">Descargar</button>
+              <a class="btn btn-sm btn-success" [href]="whatsappUrl(card)" target="_blank">WhatsApp</a>
+              <a class="btn btn-sm btn-outline-secondary" [href]="'/verificar/' + card.serial" target="_blank">Verificar</a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-muted mb-0" *ngIf="cards.length === 0">Aun no hay cartones generados.</p>
+  </div>
+</section>

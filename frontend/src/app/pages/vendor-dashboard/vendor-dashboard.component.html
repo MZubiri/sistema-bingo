@@ -1,0 +1,15 @@
+<section class="page">
+  <h1 class="h3 mb-4">Dashboard representante</h1>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+  <div *ngIf="data">
+    <div class="panel mb-4">
+      <h2 class="h5 mb-1">{{ data.fullName }}</h2>
+      <span class="badge text-bg-secondary">{{ data.organizationCode }}</span>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="metric"><span>Total agrupacion</span><strong>{{ data.totalInOrganization }}</strong></div></div>
+      <div class="col-md-4"><div class="metric"><span>Generados</span><strong>{{ data.assignedInOrganization }}</strong></div></div>
+      <div class="col-md-4"><div class="metric"><span>Disponibles</span><strong>{{ data.availableInOrganization }}</strong></div></div>
+    </div>
+  </div>
+</section>

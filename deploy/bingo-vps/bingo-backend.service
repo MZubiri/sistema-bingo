@@ -1,0 +1,16 @@
+[Unit]
+Description=Bingo URP Spring Boot Backend
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/bingo/backend
+EnvironmentFile=/etc/bingo/bingo-backend.env
+ExecStart=/var/www/bingo/runtime/bin/java -jar /var/www/bingo/backend/bingo-backend.jar
+Restart=always
+RestartSec=8
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

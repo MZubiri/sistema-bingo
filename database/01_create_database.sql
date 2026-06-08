@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS bingo_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+CREATE USER IF NOT EXISTS 'bingo'@'%' IDENTIFIED BY 'bingo123';
+GRANT ALL PRIVILEGES ON bingo_db.* TO 'bingo'@'%';
+FLUSH PRIVILEGES;
