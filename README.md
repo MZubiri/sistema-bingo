@@ -1,8 +1,12 @@
-# Sistema Bingo
+# Sistema Bingo 🎟️
 
-Sistema web para asignar cartones de bingo ya generados en CSV. No crea numeros aleatorios: importa `cartones_generados.csv`, conserva 3000 cartones seriados y permite que cada representante seleccione un carton disponible de su agrupacion.
+**Caso de Éxito Real:** Este sistema web fue diseñado y desarrollado a solicitud de **3 asociaciones estudiantiles de la Universidad Ricardo Palma (URP)** en el ramo de Geotecnia (**GEOURP**, **CIVIAL** y **ACI**), con el propósito de gestionar y asignar de forma segura y concurrente **3,000 cartones de bingo únicos** para una actividad pro-fondos.
 
-## Estructura
+La plataforma permite a los representantes autorizados de cada agrupación seleccionar y reservar cartones seriados importados desde un archivo CSV (`cartones_generados.csv`), previniendo colisiones de asignación mediante mecanismos avanzados de concurrencia.
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```text
 backend/    API Spring Boot 3, JWT, JPA, Flyway, PDF
@@ -10,37 +14,52 @@ frontend/   Angular con Bootstrap y guards por rol
 database/   SQL inicial y ejemplo Nginx
 ```
 
-## Requisitos
+---
 
-- Java 21
-- Node 22 o compatible
-- Docker y Docker Compose para MySQL local
+## 🛠️ Stack Tecnológico
 
-No necesitas Maven instalado: el backend incluye Maven Wrapper.
+*   **Backend:** Java 21 / Spring Boot 3 / Spring Data JPA / Flyway (Migraciones de BD).
+*   **Frontend:** Angular con Bootstrap y guards de seguridad por roles.
+*   **Base de Datos:** MySQL 8.0 (Dockerizada localmente).
+*   **Despliegue y Hosting:** Desplegado con éxito en producción en una **VPS Linux (Contabo)**, utilizando **Nginx** como Proxy Inverso y certificado **HTTPS** gestionado con Certbot.
 
-## Base de datos local
+---
 
+## ⚙️ Concurrencia, Idempotencia y Robustez
+
+Debido al volumen de usuarios concurrentes al momento de la venta de cartones, la aplicación implementa salvaguardas robustas en el backend:
+*   **Bloqueo Pesimista (Pessimistic Locking):** Bloqueo en base de datos sobre los registros de usuario y cartón disponible durante el proceso de asignación para evitar que dos representantes reserven el mismo cartón.
+*   **Idempotencia mediante Claves:** Soporte de cabecera `Idempotency-Key` en peticiones críticas. Si el frontend reintenta la misma solicitud por inestabilidad de red, el backend retorna la transacción previa sin generar duplicados.
+*   **Integración de PDF y WhatsApp:** Generación automatizada de PDF en servidor con opción en frontend para descarga directa o compartir mediante un enlace público de validación por WhatsApp.
+
+---
+
+## 📦 Instrucciones de Ejecución Local
+
+### Prerrequisitos
+*   Java 21 JDK instalado.
+*   Node.js v22 o compatible.
+*   Docker y Docker Compose (para MySQL local).
+
+### 1. Base de Datos Local
+Inicia el contenedor de MySQL:
 ```bash
 docker compose up -d mysql
 ```
+*   **Base de datos:** `bingo_db`
+*   **Usuario:** `bingo`
+*   **Contraseña:** `bingo123`
+*(Script de inicialización en `database/01_create_database.sql`)*
 
-Credenciales por defecto:
-
-- Base de datos: `bingo_db`
-- Usuario: `bingo`
-- Password: `bingo123`
-
-El script equivalente esta en `database/01_create_database.sql`.
-
-## Backend
-
+### 2. Levantar el Backend
+El backend incluye Maven Wrapper. Inícialo con:
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
+Al arrancar, Flyway creará el esquema automáticamente e importará de forma idempotente los 3,000 cartones desde `backend/src/main/resources/cartones_generados.csv`.
 
-Variables utiles:
-
+#### Variables de Entorno Recomendadas:
 ```bash
 DB_URL=jdbc:mysql://localhost:3306/bingo_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 DB_USERNAME=bingo
@@ -50,96 +69,31 @@ FRONTEND_URL=http://localhost:4200
 PUBLIC_URL=http://localhost:8080
 ```
 
-Al iniciar, Flyway crea las tablas y el importador carga `backend/src/main/resources/cartones_generados.csv`. La importacion es idempotente: si los seriales ya existen, no los duplica.
-
-## Usuarios iniciales
-
-El backend crea usuarios mediante Seeder con password BCrypt. Password inicial para todos:
-
-```text
-Bingo2026
-```
-
-Usuarios:
-
-- Admin: `admin`
-- Representantes GEOURP: `geourp01`, `geourp02`, `geourp03`, `geourp04`
-- Representantes CIVIAL: `civial01`, `civial02`, `civial03`, `civial04`
-- Representantes ACI: `aci01`, `aci02`, `aci03`, `aci04`
-
-## Frontend
-
+### 3. Levantar el Frontend
 ```bash
 cd frontend
 npm install
 npm start
 ```
+Abre tu navegador en `http://localhost:4200`.
 
-URL local:
+---
 
-```text
-http://localhost:4200
-```
+## 🔑 Usuarios Iniciales (Seeders)
+Las contraseñas de todos los representantes iniciales están cifradas con BCrypt.
+Contraseña por defecto: **`Bingo2026`**
 
-## Endpoints principales
+**Usuarios disponibles:**
+*   Administrador: `admin`
+*   Representantes GEOURP: `geourp01`, `geourp02`, `geourp03`, `geourp04`
+*   Representantes CIVIAL: `civial01`, `civial02`, `civial03`, `civial04`
+*   Representantes ACI: `aci01`, `aci02`, `aci03`, `aci04`
 
-- `POST /api/auth/login`
-- `POST /api/account/change-password`
-- `GET /api/admin/dashboard`
-- `GET /api/admin/cards`
-- `PATCH /api/admin/cards/{id}/cancel`
-- `GET /api/representative/dashboard`
-- `GET /api/representative/cards/available?search=012&page=0&size=50`
-- `POST /api/representative/cards/generate`
-- `GET /api/representative/cards`
-- `GET /api/cards/{serial}/pdf`
-- `GET /api/public/cards/{serial}/verify`
+---
 
-## Concurrencia e idempotencia
+## 🔌 Endpoints Principales
 
-La generacion de cartones usa:
-
-- Transaccion de base de datos.
-- Bloqueo pesimista sobre usuario y carton disponible.
-- Restricciones unicas en `serial`, `positional_signature` e `idempotency_requests`.
-- Header obligatorio `Idempotency-Key` en `POST /api/vendor/cards/generate`.
-
-La generacion recibe `buyerName`, `serial` e `idempotencyKey`. Si el frontend reintenta la misma solicitud con la misma clave, el backend devuelve el mismo carton.
-
-## PDF y WhatsApp
-
-Cada carton asignado puede descargarse desde:
-
-```text
-GET /api/cards/{serial}/pdf
-```
-
-El frontend incluye botones para ver PDF, descargar PDF como blob autenticado y compartir por WhatsApp un texto con enlace publico de verificacion.
-
-## Build
-
-Backend:
-
-```bash
-cd backend
-./mvnw -DskipTests package
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm run build
-```
-
-## Despliegue VPS Linux
-
-1. Instalar Java 21, Node/Nginx y MySQL.
-2. Crear base de datos y usuario con `database/01_create_database.sql`.
-3. Copiar `backend/target/bingo-backend-0.0.1-SNAPSHOT.jar` al servidor.
-4. Ejecutar backend como servicio systemd con variables de entorno seguras.
-5. Compilar frontend con `npm run build` y copiar `frontend/dist/frontend/browser` a `/var/www/bingo/frontend`.
-6. Usar `database/nginx-bingo.conf` como base para el reverse proxy.
-7. Configurar HTTPS con Certbot.
-
-En produccion cambia obligatoriamente `JWT_SECRET`, passwords de MySQL y `PUBLIC_URL`.
+*   `POST /api/auth/login` - Autenticación y obtención de JWT.
+*   `POST /api/representative/cards/generate` - Asignación de cartón (requiere idempotency key).
+*   `GET /api/cards/{serial}/pdf` - Descarga del PDF de un cartón.
+*   `GET /api/public/cards/{serial}/verify` - Endpoint público de validación de autenticidad.
